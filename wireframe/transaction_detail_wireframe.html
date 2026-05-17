@@ -1,0 +1,68 @@
+<style>
+  .wf-screen { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); overflow: hidden; max-width: 360px; margin: 0 auto; }
+  .wf-nav { background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .wf-nav-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .wf-nav-back { font-size: 12px; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .wf-body { background: var(--color-background-primary); padding: 16px; }
+  .wf-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; margin-bottom: 12px; border: 0.5px solid var(--color-border-tertiary); }
+  .wf-amount { font-size: 32px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+  .wf-amount-meta { font-size: 12px; color: var(--color-text-secondary); margin: 0; }
+  .wf-divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 12px 0; }
+  .wf-field { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .wf-field:last-child { border-bottom: none; }
+  .wf-field-label { font-size: 12px; color: var(--color-text-tertiary); padding-top: 1px; }
+  .wf-field-value { font-size: 13px; color: var(--color-text-primary); text-align: right; max-width: 200px; }
+  .wf-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--color-background-primary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-secondary); }
+  .wf-memo { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; text-align: right; }
+  .wf-section-label { font-size: 11px; color: var(--color-text-tertiary); margin: 0 0 8px; letter-spacing: 0.04em; }
+  .wf-btn-primary { width: 100%; padding: 12px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+  .wf-btn-danger { width: 100%; padding: 12px; background: transparent; color: #e53e3e; border: 0.5px solid #e53e3e; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .wf-created { font-size: 11px; color: var(--color-text-tertiary); text-align: center; margin-top: 12px; }
+</style>
+
+<h2 class="sr-only">取引詳細画面のワイヤーフレーム</h2>
+
+<div class="wf-screen">
+  <div class="wf-nav">
+    <span class="wf-nav-back">← 一覧に戻る</span>
+    <span class="wf-nav-title">取引詳細</span>
+    <span style="width:60px"></span>
+  </div>
+
+  <div class="wf-body">
+    <div class="wf-card">
+      <p class="wf-amount-meta">金額</p>
+      <p class="wf-amount">¥12,000</p>
+      <hr class="wf-divider">
+      <div class="wf-field">
+        <span class="wf-field-label">タイトル</span>
+        <span class="wf-field-value">電車定期</span>
+      </div>
+      <div class="wf-field">
+        <span class="wf-field-label">日付</span>
+        <span class="wf-field-value">2026年5月9日</span>
+      </div>
+      <div class="wf-field">
+        <span class="wf-field-label">カテゴリ</span>
+        <span class="wf-field-value"><span class="wf-badge">交通費</span></span>
+      </div>
+      <div class="wf-field">
+        <span class="wf-field-label">支払方法</span>
+        <span class="wf-field-value"><span class="wf-badge">クレジット</span></span>
+      </div>
+      <div class="wf-field">
+        <span class="wf-field-label">備考</span>
+        <span class="wf-field-value wf-memo">6ヶ月定期。次回更新は11月。</span>
+      </div>
+    </div>
+
+    <button class="wf-btn-primary" onclick="sendPrompt('編集画面のワイヤーフレームを作って')">
+      <i class="ti ti-pencil" aria-hidden="true"></i> 編集する
+    </button>
+    <button class="wf-btn-danger">
+      <i class="ti ti-trash" aria-hidden="true"></i> 削除する
+    </button>
+
+    <p class="wf-created">登録日時：2026年5月9日 18:42</p>
+  </div>
+</div>

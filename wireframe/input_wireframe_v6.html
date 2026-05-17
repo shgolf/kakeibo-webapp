@@ -1,0 +1,75 @@
+<style>
+  .wf-screen { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); overflow: hidden; max-width: 360px; margin: 0 auto; }
+  .wf-nav { background: var(--color-background-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .wf-nav-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .wf-nav-back { font-size: 12px; color: var(--color-text-secondary); cursor: pointer; }
+  .wf-body { background: var(--color-background-primary); padding: 16px; }
+  .wf-field-group { margin-bottom: 14px; }
+  .wf-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+  .wf-required { font-size: 10px; color: #e53e3e; }
+  .wf-input { width: 100%; padding: 9px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-primary); background: var(--color-background-primary); box-sizing: border-box; }
+  .wf-input::placeholder { color: var(--color-text-tertiary); }
+  .wf-select { width: 100%; padding: 9px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-primary); background: var(--color-background-primary); box-sizing: border-box; }
+  .wf-textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-primary); background: var(--color-background-primary); box-sizing: border-box; height: 72px; resize: none; }
+  .wf-toggle-group { display: flex; gap: 8px; }
+  .wf-toggle { flex: 1; padding: 8px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; text-align: center; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); }
+  .wf-toggle.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); font-weight: 500; }
+  .wf-btn-primary { width: 100%; padding: 12px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
+  .wf-btn-cancel { width: 100%; padding: 10px; background: transparent; color: var(--color-text-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 8px; }
+  .wf-divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 16px 0; }
+</style>
+
+<div class="wf-screen">
+  <div class="wf-nav">
+    <span class="wf-nav-back">← キャンセル</span>
+    <span class="wf-nav-title">新規登録</span>
+    <span style="width:60px"></span>
+  </div>
+
+  <div class="wf-body">
+    <div class="wf-field-group">
+      <div class="wf-label">日付 <span class="wf-required">*必須</span></div>
+      <input class="wf-input" type="date" value="2026-05-10" />
+    </div>
+
+    <div class="wf-field-group">
+      <div class="wf-label">タイトル <span class="wf-required">*必須</span></div>
+      <input class="wf-input" type="text" placeholder="例：スーパー、ランチ" />
+    </div>
+
+    <div class="wf-field-group">
+      <div class="wf-label">金額 <span class="wf-required">*必須</span></div>
+      <input class="wf-input" type="number" placeholder="例：1500" />
+    </div>
+
+    <div class="wf-field-group">
+      <div class="wf-label">カテゴリ</div>
+      <select class="wf-select">
+        <option value="">選択してください</option>
+        <option>食費</option>
+        <option>交通費</option>
+        <option>衣類</option>
+        <option>その他</option>
+      </select>
+    </div>
+
+    <div class="wf-field-group">
+      <div class="wf-label">支払方法 <span class="wf-required">*必須</span></div>
+      <div class="wf-toggle-group">
+        <div class="wf-toggle active">現金</div>
+        <div class="wf-toggle">クレジット</div>
+        <div class="wf-toggle">振込</div>
+      </div>
+    </div>
+
+    <div class="wf-field-group">
+      <div class="wf-label">備考</div>
+      <textarea class="wf-textarea" placeholder="メモがあれば入力してください"></textarea>
+    </div>
+
+    <hr class="wf-divider">
+
+    <button class="wf-btn-primary">✓ 登録する</button>
+    <button class="wf-btn-cancel">キャンセル</button>
+  </div>
+</div>
