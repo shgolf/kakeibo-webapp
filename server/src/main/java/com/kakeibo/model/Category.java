@@ -1,4 +1,4 @@
-package model;
+package com.kakeibo.model;
 
 public enum Category {
     FOOD,        // 食費

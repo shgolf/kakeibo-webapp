@@ -1,4 +1,4 @@
-package model;
+package com.kakeibo.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
