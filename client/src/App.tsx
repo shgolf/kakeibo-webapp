@@ -1,12 +1,19 @@
-import {Button} from "@/components/ui/button.tsx";
+import {Route, Routes} from "react-router-dom";
+import Layout from "@/components/Layout.tsx";
+import HomePage from "@/pages/HomePage.tsx";
+import NewExpensePage from "@/pages/NewExpensePage.tsx";
+import TransactionListPage from "./pages/TransactionListPage";
+import TransactionDetailPage from "./pages/TransactionDetailPage";
 
-function App() {
+export default function App() {
     return (
-        <div>
-            <h1>家計簿アプリ</h1>
-            <Button>テストボタン</Button>
-        </div>
+        <Routes>
+            <Route element={<Layout/>}>
+                <Route path="/" element={<HomePage/>}></Route>
+                <Route path="/new" element={<NewExpensePage/>}></Route>
+                <Route path="/transactions" element={<TransactionListPage/>}></Route>
+                <Route path="/transactions/:id" element={<TransactionDetailPage/>}></Route>
+            </Route>
+        </Routes>
     )
 }
-
-export default App
