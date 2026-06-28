@@ -1,16 +1,20 @@
 package com.kakeibo.repository;
 
 import com.kakeibo.model.Expense;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ExpenseRepository {
     private final JdbcTemplate jdbc;
+    private final ExpenseRowMapper rowMapper = new ExpenseRowMapper();
 
     // コンストラクタインジェクション（@Autowired は不要）
     public ExpenseRepository(JdbcTemplate jdbc) {
@@ -35,5 +39,20 @@ public class ExpenseRepository {
 
         expense.setId(keyHolder.getKey().longValue());
         return expense;
+    }
+
+    public List<Expense> findAll() {
+        String sql = "SELECT * FROM expenses ORDER BY date DESC, id DESC";
+        return jdbc.query(sql, rowMapper);
+    }
+
+    public Optional<Expense> findById(Long id) {
+        String sql = "SELECT * FROM expenses WHERE id = ?";
+        try {
+            Expense expense = jdbc.queryForObject(sql, rowMapper, id);
+            return Optional.of(expense);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 }
