@@ -69,13 +69,14 @@ pnpm dev
 CRUD の C（Create）と R（Read=一覧）。まずはサーバーだけで完結させる。
 
 - [x] `ExpenseRepository`（`JdbcTemplate` でINSERT / SELECT、`RowMapper` で `Expense` に詰める）
-- [ ] `ExpenseService`（業務ロジックの置き場。今は薄くてよい）
-- [ ] リクエスト/レスポンス用DTO（`ExpenseRequest` / `ExpenseResponse`）+ `@Valid` でバリデーション
+- [x] `ExpenseService`（業務ロジックの置き場。今は薄くてよい）
+- [ ] リクエスト/レスポンス用DTO（`ExpenseRequest` / `ExpenseResponse`）+ `@Valid` でバリデーション ← 次の改善
   - 必須: date / title / amount / paymentType（wireframeの「*必須」に合わせる）
-- [ ] `ExpenseController`
-  - `POST /api/expenses` … 登録
+  - 今はエンティティ直結で動かしている。`id`/`createdAt` を送らせない & バリデーションのため後で差し替える
+- [x] `ExpenseController`
+  - `POST /api/expenses` … 登録（201 + id 入り body を確認済み）
   - `GET  /api/expenses` … 一覧（新しい順）
-- [ ] `curl` で登録 → 一覧取得を確認
+- [x] `curl` で登録 → 一覧取得を確認（POST→201/id:1、GET→200 を確認 2026-06-28）
 
 **ゴール**: ターミナルから支出を登録でき、一覧で返ってくる。フロントはまだ無関係。
 
