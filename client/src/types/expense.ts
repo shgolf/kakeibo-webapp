@@ -14,10 +14,10 @@ export interface Expense {
 }
 
 export interface ExpenseInput {
-    date: string;
+    date: string | null;
     title: string;
-    amount: number;
+    amount: number | null;
     category: Category | null;
-    paymentType: PaymentType;
+    paymentType: PaymentType | null;
     memo: string | null;
 }

@@ -70,9 +70,9 @@ CRUD の C（Create）と R（Read=一覧）。まずはサーバーだけで完
 
 - [x] `ExpenseRepository`（`JdbcTemplate` でINSERT / SELECT、`RowMapper` で `Expense` に詰める）
 - [x] `ExpenseService`（業務ロジックの置き場。今は薄くてよい）
-- [ ] リクエスト/レスポンス用DTO（`ExpenseRequest` / `ExpenseResponse`）+ `@Valid` でバリデーション ← 次の改善
+- [x] リクエスト/レスポンス用DTO（`ExpenseRequest` / `ExpenseResponse`）+ `@Valid` でバリデーション
   - 必須: date / title / amount / paymentType（wireframeの「*必須」に合わせる）
-  - 今はエンティティ直結で動かしている。`id`/`createdAt` を送らせない & バリデーションのため後で差し替える
+  - record で実装。異常系（amount:0 / title空 → 400）を確認済み
 - [x] `ExpenseController`
   - `POST /api/expenses` … 登録（201 + id 入り body を確認済み）
   - `GET  /api/expenses` … 一覧（新しい順）
@@ -82,30 +82,69 @@ CRUD の C（Create）と R（Read=一覧）。まずはサーバーだけで完
 
 ---
 
-## Phase 2. フロントの土台
+## Phase 2. フロントの土台 ✅ 完了
 
 画面を作る前に共通部分を用意する。ここを先にやると各画面が一気に作りやすくなる。
 
-- [ ] ルーティング導入（`react-router` を追加）: `/`（ホーム）・`/new`（入力）・`/transactions`（一覧）・`/transactions/:id`（詳細）
-- [ ] 共通レイアウト（wireframe上部のナビ「家計簿 / ホーム / 一覧」）
-- [ ] APIクライアント（`fetch` の薄いラッパ。ベースURL・JSON処理・エラー処理を一箇所に）
-- [ ] 型定義（`Expense`・`Category`・`PaymentType` を TS で。バックエンドのenumと一致させる）
-- [ ] Vite の dev proxy 設定（`/api` をバックエンドへ）
+- [x] ルーティング導入（`react-router-dom`）: `/`（ホーム）・`/new`（入力）・`/transactions`（一覧）・`/transactions/:id`（詳細）
+- [x] 共通レイアウト（wireframe上部のナビ「家計簿 / ホーム / 一覧」）
+- [x] APIクライアント（`fetch` の薄いラッパ。ベースURL・JSON処理・エラー処理を一箇所に）
+- [x] 型定義（`Expense`・`Category`・`PaymentType` を TS で。バックエンドのenumと一致させる）
+- [x] Vite の dev proxy 設定（`/api` をバックエンドへ）
 
 **ゴール**: 空ページでもルーティングで画面遷移でき、APIを呼ぶ準備が整う。
 
+### ハマりどころメモ
+
+- `<Routes>` を使うには、その外側（`main.tsx`）を **`<BrowserRouter>` で囲む**必要がある。
+  囲まないと描画ごと落ちて**画面が真っ白**になる。同じ形（Provider を天井に置く）は ThemeProvider 等でも共通。
+- **白画面が出たら、まず F12 → Console** を見る。原因がほぼ一発で分かる。
+- `shadcn add` の直後は Vite が再最適化で固まることがある。**再起動**で直る（`rm -rf node_modules/.vite` も有効）。
+- スタイルは **Tailwind + shadcn のトークンに統一**（`bg-background` / `text-muted-foreground` / `text-destructive` 等）。
+  生の色を直書きしないことでダークモードが自動で効く。
+
 ---
 
-## Phase 3. 入力画面（`input_wireframe_v6.html`）
+## Phase 3. 入力画面（`input_wireframe_v6.html`）✅ 完了
 
 最初の「画面 × API」連携。Phase1のPOSTにつなぐ。
 
-- [ ] フォームUI（日付・タイトル・金額・カテゴリselect・支払方法トグル・備考）
-- [ ] 入力state管理 + 必須項目のフロント側バリデーション
-- [ ] 登録ボタン → `POST /api/expenses` → 成功で一覧へ遷移
-- [ ] エラー時の表示（サーバーのバリデーションエラーを画面に出す）
+- [x] フォームUI（日付・タイトル・金額・カテゴリselect・支払方法トグル・備考）
+- [x] 入力state管理（バリデーションはバックエンドに一元化 ← 下記の方針を参照）
+- [x] 登録ボタン → `POST /api/expenses` → 成功で一覧へ遷移
+- [x] エラー時の表示（項目別 + 総括の二段構え）
+- [x] 必須項目の `*必須` 表示
 
 **ゴール**: ブラウザから支出を登録できる。
+
+### 決めた方針：バリデーションはバックエンドに一元化
+
+フロントでは業務ルール（必須・1以上など）を**判定しない**。理由:
+
+- バックエンドの検証はどのみち必須（`curl` で直接叩かれるため省けない）。同じルールを2か所に書くと**二重管理**になり食い違う。
+- フロントの仕事は「ユーザーが入力した状態を、"空っぽ"も含めて**正直にサーバーへ伝える**」こと。妥当性の判定はバックエンド。
+- そのため `ExpenseInput` は `date: string | null` のように **null を許容する型**にして、空欄はそのまま `null` で送る。
+  フロントで `if (!x) return;` と握りつぶすと「押しても無反応」の silent failure になるので**置かない**。
+- `<Input required>`（HTML標準の必須属性）も**使わない**。ブラウザが送信自体をブロックしてしまい、
+  バックエンドのメッセージが永久に出なくなるため。代わりに `aria-required` を使う。
+
+### エラーメッセージの流れ（2系統が並走）
+
+```
+                    ┌─ errors{}  → fieldErrors → 各項目の下（FieldError）
+バリデーション失敗 ──┤
+                    └─ title     → err.message → 登録ボタン上（総括）
+
+その他のエラー ──── detail or 既定文言 → err.message → 登録ボタン上
+（通信断・500など）
+```
+
+- **項目別**: DTO の `@NotBlank(message="...")` → `GlobalExceptionHandler` が `fe.getDefaultMessage()` で取り出し
+  → `pd.setProperty("errors", ...)` で JSON に載せる → api.ts が `ApiError.fieldErrors` に保持 → `<FieldError>` で表示。
+- **総括**: `pd.setTitle(...)` → `body.title` → `ApiError.message` → 登録ボタン上に表示。
+- `"errors"` というキー名は**独自の拡張メンバー**（RFC 7807 が明示的に許可）。Java 側とフロント側で名前を一致させる契約。
+- ⚠️ `spring.mvc.problemdetails.enabled=true` は**入れないこと**。Spring 標準ハンドラが
+  `MethodArgumentNotValidException` を横取りし、`errors` が消えて項目別表示が全部壊れる（検証済み）。
 
 ---
 

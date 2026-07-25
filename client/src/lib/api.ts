@@ -7,18 +7,19 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     });
     if (!res.ok) {
         let message = `エラーが発生しました (${res.status})`;
+        let fieldErrors: Record<string, string> = {};
         try {
             const body = await res.json();
             if (body?.errors) {
-                // {title: "...", amount: "..."} → 右のvaluesの部分を改行区切りの1文字列に
-                message = Object.values(body.errors).join("\n");
+                fieldErrors = body.errors;
+                message = body?.title ?? "入力内容に不備があります";
             } else if (body?.detail) {
                 message = body.detail;
             }
         } catch {
             // body が JSON でないときは既定メッセージのまま
         }
-        throw new Error(message);
+        throw new ApiError(message, fieldErrors);
     }
     return res.status === 204 ? (undefined as T) : await res.json();
 }
@@ -31,3 +32,13 @@ export const api = {
             body: JSON.stringify(input),
         }),
 };
+
+export class ApiError extends Error {
+    fieldErrors: Record<string, string>;
+
+    constructor(message: string, fieldErrors: Record<string, string> = {}) {
+        super(message); // 親にmessageを渡すことで.messageになる
+        this.name = "ApiError";
+        this.fieldErrors = fieldErrors;
+    }
+}

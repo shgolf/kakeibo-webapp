@@ -11,20 +11,20 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public record ExpenseRequest(
-        @NotNull(message = "Date is required")
+        @NotNull(message = "日付は必須です")
         LocalDate date,
 
-        @NotBlank(message = "Title is required")
-        @Size(max = 100, message = "Title must be at most 100 characters")
+        @NotBlank(message = "タイトルは必須です")
+        @Size(max = 100, message = "タイトルは100文字以内で入力してください")
         String title,
 
-        @NotNull(message = "Amount is required")
-        @Positive(message = "Amount must be a positive number")
+        @NotNull(message = "金額は必須です")
+        @Positive(message = "金額は正の数で入力してください")
         Integer amount,
 
         Category category,
 
-        @NotNull(message = "Payment type is required")
+        @NotNull(message = "支払方法は必須です")
         PaymentType paymentType,
 
         String memo

@@ -1,5 +1,5 @@
 import {type FormEvent, useState} from "react";
-import {Field, FieldLabel} from "@/components/ui/field.tsx";
+import {Field, FieldError, FieldLabel} from "@/components/ui/field.tsx";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover.tsx";
 import {CalendarIcon} from "lucide-react";
 import {Calendar} from "@/components/ui/calendar.tsx";
@@ -20,7 +20,7 @@ import {Separator} from "@/components/ui/separator.tsx";
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group.tsx";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import type {Category, PaymentType} from "@/types/expense.ts";
-import {api} from "@/lib/api.ts";
+import {api, ApiError} from "@/lib/api.ts";
 import {toISODate} from "@/lib/date.ts";
 
 function formatDate(date: Date | undefined) {
@@ -41,6 +41,14 @@ function isValidDate(date: Date | undefined) {
     return !isNaN(date.getTime())
 }
 
+function RequiredMark() {
+    return (
+        <span className="ml-1 text-xs text-destructive" aria-hidden="true">
+            *必須
+        </span>
+    );
+}
+
 export default function NewExpensePage() {
     const navigate = useNavigate()
 
@@ -57,24 +65,28 @@ export default function NewExpensePage() {
     const [paymentType, setPaymentType] = useState<PaymentType | "">("")
     const [memo, setMemo] = useState("")
 
-    const [error, setError] = useState<String | null>(null)
+    const [error, setError] = useState<string | null>(null)
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
     const submitHandler = async (e: FormEvent) => {
         e.preventDefault();                       // ページリロードを防ぐ
         setError(null)
-        if (!date || !title || !amount || !paymentType) return;  // 最低限の必須チェック
+        setFieldErrors({})
         try {
             await api.createExpense({
-                date: toISODate(date),            // Date → "2026-07-01"（下のヘルパー）
+                date: date ? toISODate(date) : null,            // Date → "2026-07-01"（下のヘルパー）
                 title,
-                amount: Number(amount),           // string → number
+                amount: amount === "" ? null : Number(amount),           // string → number
                 category: category === "" ? null : category,
-                paymentType,
+                paymentType: paymentType === "" ? null : paymentType,
                 memo: memo === "" ? null : memo,
             });
             navigate("/transactions");            // 成功 → 一覧へ
         } catch (err) {
-            setError(err instanceof Error ? err.message : "登録に失敗しました");
+            if (err instanceof ApiError) {
+                setFieldErrors(err.fieldErrors);
+            }
+            setError(err instanceof Error ? err.message : "登録に失敗しました")
         }
     };
 
@@ -92,7 +104,7 @@ export default function NewExpensePage() {
             </div>
             <Separator/>
             <Field className="mx-auto w-90 mt-5">
-                <FieldLabel htmlFor="date-required">日付</FieldLabel>
+                <FieldLabel htmlFor="date-required">日付<RequiredMark/></FieldLabel>
                 <InputGroup>
                     <InputGroupInput
                         id="date-required"
@@ -147,9 +159,10 @@ export default function NewExpensePage() {
                         </Popover>
                     </InputGroupAddon>
                 </InputGroup>
+                <FieldError>{fieldErrors?.date}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
-                <FieldLabel htmlFor="input-field-title">タイトル</FieldLabel>
+                <FieldLabel htmlFor="input-field-title">タイトル<RequiredMark/></FieldLabel>
                 <Input
                     id="input-field-title"
                     type="text"
@@ -158,9 +171,10 @@ export default function NewExpensePage() {
                         setTitle(e.target.value)
                     }}
                 />
+                <FieldError>{fieldErrors?.title}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
-                <FieldLabel htmlFor="input-field-amount">金額</FieldLabel>
+                <FieldLabel htmlFor="input-field-amount">金額<RequiredMark/></FieldLabel>
                 <Input
                     id="input-field-amount"
                     type="number"
@@ -169,6 +183,7 @@ export default function NewExpensePage() {
                         setAmount(e.target.value)
                     }}
                 />
+                <FieldError>{fieldErrors?.amount}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
                 <FieldLabel htmlFor="input-field-category">カテゴリ</FieldLabel>
@@ -191,7 +206,7 @@ export default function NewExpensePage() {
                 </Select>
             </Field>
             <Field className="mx-auto w-90 mt-3">
-                <FieldLabel htmlFor="input-field-payment-type">支払方法</FieldLabel>
+                <FieldLabel htmlFor="input-field-payment-type">支払方法<RequiredMark/></FieldLabel>
                 <ToggleGroup
                     variant="outline"
                     type="single"
@@ -210,6 +225,7 @@ export default function NewExpensePage() {
                         振込
                     </ToggleGroupItem>
                 </ToggleGroup>
+                <FieldError>{fieldErrors?.paymentType}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
                 <FieldLabel htmlFor="input-field-memo">備考</FieldLabel>

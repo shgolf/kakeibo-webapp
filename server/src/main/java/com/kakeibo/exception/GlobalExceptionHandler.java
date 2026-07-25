@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
 
         ex.getBindingResult().getFieldErrors().forEach(fe -> errors.put(fe.getField(), fe.getDefaultMessage()));
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        pd.setTitle("入力内容に誤りがあります");
+        pd.setTitle("入力内容に不備があります");
         pd.setProperty("errors", errors);
         return pd;
     }
