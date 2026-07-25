@@ -11,3 +11,9 @@ export function fromISODate(s: string): Date {
     const [y, m, d] = s.split("-").map(Number);
     return new Date(y, m - 1, d);   // ローカル0時で生成（ここでもUTCを避ける）
 }
+
+/** 今日が属する月 → "2026-07" */
+export function currentMonth(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
