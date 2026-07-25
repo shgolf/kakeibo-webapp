@@ -23,5 +23,13 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
+    @ExceptionHandler(ExpenseNotFoundException.class)
+    public ProblemDetail handleNotFound(ExpenseNotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        pd.setTitle("支出が存在しません");
+        pd.setDetail(ex.getMessage());
+        return pd;
+    }
+
 
 }
