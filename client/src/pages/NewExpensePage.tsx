@@ -57,8 +57,11 @@ export default function NewExpensePage() {
     const [paymentType, setPaymentType] = useState<PaymentType | "">("")
     const [memo, setMemo] = useState("")
 
+    const [error, setError] = useState<String | null>(null)
+
     const submitHandler = async (e: FormEvent) => {
         e.preventDefault();                       // ページリロードを防ぐ
+        setError(null)
         if (!date || !title || !amount || !paymentType) return;  // 最低限の必須チェック
         try {
             await api.createExpense({
@@ -71,7 +74,7 @@ export default function NewExpensePage() {
             });
             navigate("/transactions");            // 成功 → 一覧へ
         } catch (err) {
-            console.error(err);                   // エラー表示は後で詰める
+            setError(err instanceof Error ? err.message : "登録に失敗しました");
         }
     };
 
@@ -218,6 +221,11 @@ export default function NewExpensePage() {
                     }}
                 />
             </Field>
+            {error && (
+                <p className="mx-auto w-90 mt-3 text-sm text-destructive whitespace-pre-line">
+                    {error}
+                </p>
+            )}
             <Button
                 type="submit"
                 className="mx-auto w-90 mt-3"

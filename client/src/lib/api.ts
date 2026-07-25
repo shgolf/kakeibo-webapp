@@ -6,10 +6,20 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
         ...options,
     });
     if (!res.ok) {
-        // 400(バリデーション)や500をここで一括ハンドリング
-        throw new Error(`API error ${res.status}`);
+        let message = `エラーが発生しました (${res.status})`;
+        try {
+            const body = await res.json();
+            if (body?.errors) {
+                // {title: "...", amount: "..."} → 右のvaluesの部分を改行区切りの1文字列に
+                message = Object.values(body.errors).join("\n");
+            } else if (body?.detail) {
+                message = body.detail;
+            }
+        } catch {
+            // body が JSON でないときは既定メッセージのまま
+        }
+        throw new Error(message);
     }
-    // 204 No Content 対策
     return res.status === 204 ? (undefined as T) : await res.json();
 }
 
