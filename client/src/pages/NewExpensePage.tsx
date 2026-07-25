@@ -108,6 +108,9 @@ export default function NewExpensePage() {
                 <InputGroup>
                     <InputGroupInput
                         id="date-required"
+                        aria-required={true}
+                        aria-invalid={!!fieldErrors?.date}
+                        aria-describedby={fieldErrors?.date ? "date-error" : undefined}
                         value={value}
                         placeholder="July 01, 2026"
                         onChange={(e) => {
@@ -159,31 +162,37 @@ export default function NewExpensePage() {
                         </Popover>
                     </InputGroupAddon>
                 </InputGroup>
-                <FieldError>{fieldErrors?.date}</FieldError>
+                <FieldError id="date-error">{fieldErrors?.date}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
                 <FieldLabel htmlFor="input-field-title">タイトル<RequiredMark/></FieldLabel>
                 <Input
                     id="input-field-title"
+                    aria-required={true}
+                    aria-invalid={!!fieldErrors?.title}
+                    aria-describedby={fieldErrors?.title ? "title-error" : undefined}
                     type="text"
                     placeholder="例：スーパー、ランチ"
                     onChange={(e) => {
                         setTitle(e.target.value)
                     }}
                 />
-                <FieldError>{fieldErrors?.title}</FieldError>
+                <FieldError id="title-error">{fieldErrors?.title}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
                 <FieldLabel htmlFor="input-field-amount">金額<RequiredMark/></FieldLabel>
                 <Input
                     id="input-field-amount"
+                    aria-required={true}
+                    aria-invalid={!!fieldErrors?.amount}
+                    aria-describedby={fieldErrors?.amount ? "amount-error" : undefined}
                     type="number"
                     placeholder="例：1500"
                     onChange={(e) => {
                         setAmount(e.target.value)
                     }}
                 />
-                <FieldError>{fieldErrors?.amount}</FieldError>
+                <FieldError id="amount-error">{fieldErrors?.amount}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
                 <FieldLabel htmlFor="input-field-category">カテゴリ</FieldLabel>
@@ -210,6 +219,9 @@ export default function NewExpensePage() {
                 <ToggleGroup
                     variant="outline"
                     type="single"
+                    aria-required={true}
+                    aria-invalid={!!fieldErrors?.paymentType}
+                    aria-describedby={fieldErrors?.paymentType ? "payment-type-error" : undefined}
                     value={paymentType}
                     id="input-field-payment-type"
                     className="flex w-full max-w-90 justify-between"
@@ -225,7 +237,7 @@ export default function NewExpensePage() {
                         振込
                     </ToggleGroupItem>
                 </ToggleGroup>
-                <FieldError>{fieldErrors?.paymentType}</FieldError>
+                <FieldError id="payment-type-error">{fieldErrors?.paymentType}</FieldError>
             </Field>
             <Field className="mx-auto w-90 mt-3">
                 <FieldLabel htmlFor="input-field-memo">備考</FieldLabel>
