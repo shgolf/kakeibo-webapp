@@ -100,7 +100,7 @@ export default function TransactionListPage() {
                 <TableBody>
                     {filtered.map((e) => (
                         <TableRow key={e.id}
-                                  onClick={() => navigate(`/transaction/${e.id}`)}
+                                  onClick={() => navigate(`/transactions/${e.id}`)}
                                   className="cursor-pointer"
                         >
                             <TableCell>

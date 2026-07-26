@@ -185,13 +185,58 @@ useEffect(() => {
 
 ---
 
-## Phase 5. 取引詳細画面（`transaction_detail_wireframe.html`）
+## Phase 5. 取引詳細画面（`transaction_detail_wireframe.html`）✅ 完了
 
-- [ ] `GET /api/expenses/{id}` をバックエンドに追加
-- [ ] 一覧の行クリック → 詳細へ遷移して1件表示
-- [ ] 登録日時（createdAt）の表示
+- [x] `GET /api/expenses/{id}` をバックエンドに追加
+- [x] 一覧の行クリック → 詳細へ遷移して1件表示
+- [x] 登録日時（createdAt）の表示
 
 **ゴール**: 1件の詳細が見られる。
+
+### 学んだこと
+
+**URL の値の渡し方**
+- パス（`/api/expenses/5` → `@PathVariable`）＝「どのリソースか」を特定する
+- クエリ（`?month=2026-07` → `@RequestParam`）＝「どう絞り込むか」
+- `@GetMapping("/id")` は `{}` が無いので**文字通り `/api/expenses/id`** というパスになる（プレースホルダにならない）
+
+**「見つからない」の表現＝404**
+- `Optional` をそのまま返すと 200 + 空body になり「存在しない」と「たまたま空」が区別できない
+- 採用したのは**例外方式**: `orElseThrow(() -> new ExpenseNotFoundException(id))` を投げ、
+  `GlobalExceptionHandler` で 404 の `ProblemDetail` に変換。バリデーションエラーと形式が揃い、
+  Phase 6 の更新・削除でも同じ例外を使い回せる。
+- これで `api.ts` の `body.detail` を読む枝が初めて生きた（404のメッセージがフロントの画面に出る）。
+- カスタム例外は **`RuntimeException` を継承**する（検査例外だと呼び出し元に `throws` を強制してしまう）。
+
+**`Optional` は「判断する場所」まで運ぶ乗り物**
+
+| 層 | 戻り値 | 理由 |
+|---|---|---|
+| Repository | `Optional<Expense>` | 「見つからないことがある」事実を伝える |
+| Service | `Optional<Expense>` | まだ判断しない |
+| Controller | `ExpenseResponse` | ここで「無いなら404」と判断を下す。以降に不在は存在しない |
+
+- `orElseThrow` を通った後に `Optional.of()` で包み直すのは「開けた箱をまた閉じる」冗長な形。
+- ラムダ `() -> new Xxx()` にするのは**遅延生成**のため（中身があるときに無駄な例外オブジェクトを作らない）。
+
+**フロント: `undefined` と `null` は別問題**
+- `undefined`（まだ読み込めていない）→ **`if (!expense) return null;` で1回だけ絞り込む**。
+  以降の JSX 全体で型が確定するので `?.` を全部 `.` に戻せる。
+  **`?.` を散らすのは解決ではなく `undefined` の先送り**（下流の関数で同じエラーが出るだけ）。
+- `null`（あるけど値が無い＝`category` / `createdAt` / `memo`）→ **その場で個別に処理**。
+- 関数の引数やオブジェクトのキーに渡すときだけ型が厳しくなる。JSX に直接埋めるだけなら `null` はそのまま通る（何も描画されない）。
+- `if (!expense) return null` は論理的に到達しない分岐（型の辻褄合わせの番人）。文言を出しても見えないので `null` で十分。
+
+**その他のハマりどころ**
+- `createdAt` は `"2026-06-28T11:51:48"` という**日時**形式。`split("-")` する `formatDateLong` に渡すと
+  日が `NaN` になる。`formatDateTime` を別途用意し、`split("T")` で日付と時刻に割ってから処理する。
+  予防策として日付用フォーマッタの先頭で `iso.split("T")[0]` しておくと静かに壊れない。
+- JSX 内のコメントは `{/* ... */}`。`// ...` は**文字列として画面に描画される**。
+- `&&` の落とし穴: React は `null`/`undefined`/`false` を描画しないが **`0` は描画する**。
+  数値を条件にするときは `amount > 0 &&` のように明示的に比較する。
+- flex 内でテキストを折り返すには **`min-w-0`** が必要（子要素は既定で中身より小さくならない）。
+  ラベル側には `shrink-0`、値側には `min-w-0 break-words` をセットで。
+- `whitespace-pre-wrap` を付けると Textarea で入力された改行がそのまま表示される。
 
 ---
 
