@@ -76,7 +76,7 @@ export default function TransactionDetailPage() {
                 </div>
                 <div className="flex justify-between gap-4 border-b py-2">
                     <span className="shrink-0 text-xs text-muted-foreground">備考</span>
-                    <span className="min-w-0 text-right text-sm break-words">{expense.memo}</span>
+                    <span className="min-w-0 text-right text-sm break-words whitespace-pre-wrap">{expense.memo}</span>
                 </div>
             </div>
 
