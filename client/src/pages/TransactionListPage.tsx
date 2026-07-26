@@ -6,7 +6,7 @@ import {formatDate, formatYen} from "@/lib/format.ts";
 import {CATEGORY_LABELS, PAYMENT_TYPE_LABELS} from "@/lib/labels.ts";
 import {Badge} from "@/components/ui/badge.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {NavLink} from "react-router-dom";
+import {NavLink, useNavigate} from "react-router-dom";
 import {Plus} from "lucide-react";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 import {currentMonth} from "@/lib/date.ts";
@@ -29,6 +29,8 @@ export default function TransactionListPage() {
     })
 
     const total = filtered.reduce((sum, e) => sum + e.amount, 0);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         let cancelled = false;
@@ -97,7 +99,10 @@ export default function TransactionListPage() {
                 </TableHeader>
                 <TableBody>
                     {filtered.map((e) => (
-                        <TableRow key={e.id}>
+                        <TableRow key={e.id}
+                                  onClick={() => navigate(`/transaction/${e.id}`)}
+                                  className="cursor-pointer"
+                        >
                             <TableCell>
                                 <div>{e.title}</div>
                                 <div className="text-xs text-muted-foreground">

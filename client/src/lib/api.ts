@@ -26,6 +26,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
     listExpenses: () => request<Expense[]>("/expenses"),
+    getExpense: (id: string) => request<Expense>(`/expenses/${id}`),
     createExpense: (input: ExpenseInput) =>
         request<Expense>("/expenses", {
             method: "POST",
