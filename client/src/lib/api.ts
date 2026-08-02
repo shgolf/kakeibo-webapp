@@ -32,6 +32,13 @@ export const api = {
             method: "POST",
             body: JSON.stringify(input),
         }),
+    updateExpense: (id: string, input: ExpenseInput) =>
+        request<Expense>(`/expenses/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(input),
+        }),
+    deleteExpense: (id: string) =>
+        request<void>(`/expenses/${id}`, {method: "DELETE"}),
 };
 
 export class ApiError extends Error {

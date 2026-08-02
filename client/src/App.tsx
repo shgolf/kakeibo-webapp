@@ -13,6 +13,7 @@ export default function App() {
                 <Route path="/new" element={<NewExpensePage/>}></Route>
                 <Route path="/transactions" element={<TransactionListPage/>}></Route>
                 <Route path="/transactions/:id" element={<TransactionDetailPage/>}></Route>
+                <Route path="/transactions/:id/edit" element={<NewExpensePage/>}/>
             </Route>
         </Routes>
     )

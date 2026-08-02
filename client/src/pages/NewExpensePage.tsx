@@ -6,7 +6,7 @@ import {Calendar} from "@/components/ui/calendar.tsx";
 import {InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput} from "@/components/ui/input-group.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {
     Select,
     SelectContent,
@@ -68,6 +68,9 @@ export default function NewExpensePage() {
     const [error, setError] = useState<string | null>(null)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
+    const {id} = useParams();
+    const isEdit = Boolean(id);
+
     const submitHandler = async (e: FormEvent) => {
         e.preventDefault();                       // ページリロードを防ぐ
         setError(null)
@@ -89,6 +92,7 @@ export default function NewExpensePage() {
             setError(err instanceof Error ? err.message : "登録に失敗しました")
         }
     };
+
 
     return (
         <form onSubmit={submitHandler} className="flex flex-col">

@@ -1,10 +1,21 @@
 import {Button} from "@/components/ui/button.tsx";
-import {useNavigate, useParams} from "react-router-dom";
+import {NavLink, useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import type {Expense} from "@/types/expense.ts";
 import {formatDate, formatDateTime, formatYen} from "@/lib/format.ts";
 import {api} from "@/lib/api.ts";
 import {CATEGORY_LABELS, PAYMENT_TYPE_LABELS} from "@/lib/labels.ts";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
+} from "@/components/ui/alert-dialog.tsx";
 
 export default function TransactionDetailPage() {
 
@@ -36,6 +47,15 @@ export default function TransactionDetailPage() {
     if (loading) return <p className="text-sm text-muted-foreground">読み込み中…</p>;
     if (error) return <p className="text-sm text-destructive">{error}</p>;
     if (!expense) return null;
+
+    const handleDelete = async () => {
+        try {
+            await api.deleteExpense(expense.id.toString());
+            navigate("/transactions");          // 削除後は一覧へ
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "削除に失敗しました");
+        }
+    };
 
     return (
         <div>
@@ -80,9 +100,26 @@ export default function TransactionDetailPage() {
                 </div>
             </div>
 
-            {/* TODO: 以下二つのボタンの遷移は未実装 */}
-            <Button variant="outline" className="mt-3 w-full">編集する</Button>
-            <Button variant="destructive" className="mt-2 w-full">削除する</Button>
+            <Button asChild variant="outline" className="mt-3 w-full">
+                <NavLink to={`transaction/${expense.id}/edit`}>編集する</NavLink>
+            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="mt-2 w-full">削除する</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>この取引を削除しますか？</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            「{expense.title}」を削除します。この操作は取り消せません。
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                        <AlertDialogAction variant="destructive" onClick={handleDelete}>削除する</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             {expense.createdAt && (<p className="mt-3 text-center text-xs text-muted-foreground">
                     登録日時：{formatDateTime(expense.createdAt)}
