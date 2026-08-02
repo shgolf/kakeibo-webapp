@@ -2,7 +2,6 @@ package com.kakeibo.controller;
 
 import com.kakeibo.dto.ExpenseRequest;
 import com.kakeibo.dto.ExpenseResponse;
-import com.kakeibo.exception.ExpenseNotFoundException;
 import com.kakeibo.model.Expense;
 import com.kakeibo.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -36,7 +35,17 @@ public class ExpenseController {
 
     @GetMapping("/{id}")
     public ExpenseResponse findById(@PathVariable Long id) {
-        return ExpenseResponse.from(
-                expenseService.findById(id).orElseThrow(() -> new ExpenseNotFoundException(id)));
+        return ExpenseResponse.from(expenseService.findById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ExpenseResponse edit(@PathVariable Long id, @Valid @RequestBody ExpenseRequest request) {
+        return ExpenseResponse.from(expenseService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        expenseService.delete(id);
     }
 }

@@ -1,5 +1,6 @@
 package com.kakeibo.repository;
 
+import com.kakeibo.dto.ExpenseRequest;
 import com.kakeibo.model.Expense;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,5 +55,31 @@ public class ExpenseRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public int update(Long id, ExpenseRequest request) {
+        String sql = """
+                UPDATE expenses SET
+                date = ?,
+                title = ?,
+                amount = ?,
+                category = ?,
+                payment_type = ?,
+                memo = ?
+                WHERE id = ?
+                """;
+        return jdbc.update(sql,
+                request.date(),
+                request.title(),
+                request.amount(),
+                request.category() == null ? null : request.category().name(),
+                request.paymentType().name(),
+                request.memo(),
+                id
+        );
+    }
+
+    public int deleteById(Long id) {
+        return jdbc.update("DELETE FROM expenses WHERE id = ?", id);
     }
 }
