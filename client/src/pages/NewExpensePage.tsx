@@ -1,4 +1,4 @@
-import {type FormEvent, useState} from "react";
+import {type FormEvent, useEffect, useState} from "react";
 import {Field, FieldError, FieldLabel} from "@/components/ui/field.tsx";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover.tsx";
 import {CalendarIcon} from "lucide-react";
@@ -19,9 +19,9 @@ import {
 import {Separator} from "@/components/ui/separator.tsx";
 import {ToggleGroup, ToggleGroupItem} from "@/components/ui/toggle-group.tsx";
 import {Textarea} from "@/components/ui/textarea.tsx";
-import type {Category, PaymentType} from "@/types/expense.ts";
+import type {Category, ExpenseInput, PaymentType} from "@/types/expense.ts";
 import {api, ApiError} from "@/lib/api.ts";
-import {toISODate} from "@/lib/date.ts";
+import {fromISODate, toISODate} from "@/lib/date.ts";
 
 function formatDate(date: Date | undefined) {
     if (!date) {
@@ -72,26 +72,57 @@ export default function NewExpensePage() {
     const isEdit = Boolean(id);
 
     const submitHandler = async (e: FormEvent) => {
-        e.preventDefault();                       // ページリロードを防ぐ
-        setError(null)
-        setFieldErrors({})
+        e.preventDefault();
+        setError(null);
+        setFieldErrors({});
+
+        const input: ExpenseInput = {
+            date: date ? toISODate(date) : null,
+            title,
+            amount: amount === "" ? null : Number(amount),
+            category: category === "" ? null : category,
+            paymentType: paymentType === "" ? null : paymentType,
+            memo: memo === "" ? null : memo,
+        };
+
         try {
-            await api.createExpense({
-                date: date ? toISODate(date) : null,            // Date → "2026-07-01"（下のヘルパー）
-                title,
-                amount: amount === "" ? null : Number(amount),           // string → number
-                category: category === "" ? null : category,
-                paymentType: paymentType === "" ? null : paymentType,
-                memo: memo === "" ? null : memo,
-            });
-            navigate("/transactions");            // 成功 → 一覧へ
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setFieldErrors(err.fieldErrors);
+            if (id) {
+                await api.updateExpense(id, input);
+                navigate(`/transactions/${id}`);    // 編集後 → 詳細へ戻る
+            } else {
+                await api.createExpense(input);
+                navigate("/transactions");          // 新規後 → 一覧へ
             }
-            setError(err instanceof Error ? err.message : "登録に失敗しました")
+        } catch (err) {
+            if (err instanceof ApiError) setFieldErrors(err.fieldErrors);
+            setError(err instanceof Error ? err.message : "保存に失敗しました");
         }
     };
+
+    useEffect(() => {
+        if (!id) return;                       // 新規モードなら何もしない
+        let cancelled = false;
+        (async () => {
+            try {
+                const e = await api.getExpense(id);
+                if (cancelled) return;
+                setTitle(e.title);
+                setAmount(String(e.amount));    // ← input は文字列で持っている
+                setCategory(e.category ?? "");
+                setPaymentType(e.paymentType);
+                setMemo(e.memo ?? "");
+                const d = fromISODate(e.date);
+                setDate(d);
+                setMonth(d);
+                setValue(formatDate(d));
+            } catch (err) {
+                if (!cancelled) setError(err instanceof Error ? err.message : "取得に失敗しました");
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [id]);
 
 
     return (
@@ -104,7 +135,7 @@ export default function NewExpensePage() {
                 >
                     ←キャンセル
                 </Button>
-                <h1 className="ml-16">新規登録</h1>
+                <h1 className="ml-16">{isEdit ? "取引を編集" : "新規登録"}</h1>
             </div>
             <Separator/>
             <Field className="mx-auto w-90 mt-5">
@@ -177,6 +208,7 @@ export default function NewExpensePage() {
                     aria-describedby={fieldErrors?.title ? "title-error" : undefined}
                     type="text"
                     placeholder="例：スーパー、ランチ"
+                    value={title}
                     onChange={(e) => {
                         setTitle(e.target.value)
                     }}
@@ -192,6 +224,7 @@ export default function NewExpensePage() {
                     aria-describedby={fieldErrors?.amount ? "amount-error" : undefined}
                     type="number"
                     placeholder="例：1500"
+                    value={amount}
                     onChange={(e) => {
                         setAmount(e.target.value)
                     }}
@@ -248,6 +281,7 @@ export default function NewExpensePage() {
                 <Textarea
                     id="input-field-memo"
                     placeholder="メモがあれば入力してください"
+                    value={memo}
                     onChange={(e) => {
                         setMemo(e.target.value)
                     }}
@@ -262,7 +296,7 @@ export default function NewExpensePage() {
                 type="submit"
                 className="mx-auto w-90 mt-3"
             >
-                登録する
+                {isEdit ? "更新する" : "登録する"}
             </Button>
             <Button
                 variant="outline"

@@ -240,14 +240,49 @@ useEffect(() => {
 
 ---
 
-## Phase 6. 編集・削除（CRUD の U / D）
+## Phase 6. 編集・削除（CRUD の U / D）✅ 完了
 
-- [ ] `PUT    /api/expenses/{id}`（更新）と `DELETE /api/expenses/{id}`（削除）をAPIに追加
-- [ ] 編集画面（wireframe未作成 → 入力画面を再利用して初期値を流し込むのが楽）
-- [ ] 詳細画面の「編集する」「削除する」ボタンを接続
-- [ ] 削除前の確認ダイアログ
+- [x] `PUT    /api/expenses/{id}`（更新）と `DELETE /api/expenses/{id}`（削除）をAPIに追加
+- [x] 編集画面（wireframe未作成 → 入力画面を再利用して初期値を流し込む）
+- [x] 詳細画面の「編集する」「削除する」ボタンを接続
+- [x] 削除前の確認ダイアログ（shadcn `AlertDialog`）
 
 **ゴール**: 登録した支出を後から直せる・消せる。これでCRUD完成。
+
+### 学んだこと
+
+**バックエンド**
+- `DELETE` は **204 No Content**（消したものは返しようがない）。`@ResponseStatus(HttpStatus.NO_CONTENT)` + 戻り値 `void`。
+  付けないと 200 + 空ボディになり、フロントで `res.json()` がパースエラーになる。
+  `api.ts` の `res.status === 204 ? undefined : res.json()` の分岐がここで初めて機能した。
+- `PUT` は **200 + 更新後のデータ**。`@Valid` はそのまま効く。
+- **「見つからない」判定は `jdbc.update()` の戻り値＝影響行数**で行う。UPDATE/DELETE は該当行が無くても
+  例外を投げず「0行」で正常終了するため。0 なら `ExpenseNotFoundException`（Phase 5 のものを再利用）。
+  `findById` で存在確認してから実行する方法もあるが、SQL が2回になるうえ同時削除を取りこぼす。
+
+**踏んだバグ**
+- 🔴 **`if (repo.update(...) == 0) {...} else { repo.update(...) }` で UPDATE が2回実行されていた。**
+  `if` の条件式でメソッドを呼ぶと**その時点で実行される**。UPDATE は冪等なので結果が正しく見えて気づけない。
+  → **副作用のあるメソッドは条件式に直接書かず、一度変数に受ける**（`int affected = ...`）。
+- 🔴 `request.category().name()` は category が null のとき **NPE → 500**。`create` 側と同じ null チェックが必要。
+  カテゴリは任意項目なので null は正常な入力。
+- 404 判定は **Service に集約**した（Controller でも `orElseThrow` すると二重チェックになる）。
+  Service が影響行数を知っているので、そこで投げるのが自然。
+
+**フロント**
+- 編集画面は `NewExpensePage` を**両用**にした。`useParams()` の `id` の有無でモード判別。
+  違うのは「初期値」「送信先（create/update）」「文言」の3点だけ。
+  → フォームが複雑化したら `<ExpenseForm initialValue onSubmit>` に切り出す手もある。
+- 制御コンポーネントのフォームに既存値を流し込むには **`useEffect` で `setXxx` する**（初期値は初回しか効かないため）。
+  日付は **`date` / `month` / `value` の3つ**を更新しないと表示がズレる。`fromISODate` がここで活きた。
+- `AlertDialog` の `Cancel` / `Action` は **クリックで自動的に閉じる**（`onClick` は閉じる動作に加えて実行される）。
+  開閉状態はコンポーネントが内部で持つので `useState` 不要。失敗時に開いたままにしたいなら `open` / `onOpenChange` で制御する。
+
+**ハマりどころ**
+- ⚠️ **リンクの `to` は先頭に `/` を付ける（絶対パス）**。`transactions/5/edit` と書くと現在地からの相対パスになり、
+  `/transactions/5/transactions/5/edit` のような URL になって**どのルートにも一致せず何も表示されない**。
+- URL の単数/複数の打ち間違い（`transaction` / `transactions`）も同じ症状になる。一致しないと React Router は黙って空を描画する。
+- 同じコンポーネントを2用途で使ったら、**両方の入口を確認する**（`/new` が空フォームのままか＝新規モードを壊していないか）。
 
 ---
 

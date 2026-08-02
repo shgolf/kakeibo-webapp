@@ -101,7 +101,7 @@ export default function TransactionDetailPage() {
             </div>
 
             <Button asChild variant="outline" className="mt-3 w-full">
-                <NavLink to={`transaction/${expense.id}/edit`}>編集する</NavLink>
+                <NavLink to={`/transactions/${expense.id}/edit`}>編集する</NavLink>
             </Button>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
